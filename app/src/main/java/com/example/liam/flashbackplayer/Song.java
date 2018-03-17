@@ -63,6 +63,8 @@ public interface Song extends Comparable {
 
     void setSource(String source);
 
+    void setUrl(String url);
+
     @Override
     int compareTo(@NonNull Object o);
 

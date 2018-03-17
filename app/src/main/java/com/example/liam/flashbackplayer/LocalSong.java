@@ -287,5 +287,9 @@ public class LocalSong implements Song {
     public void setSource(String source) {
         this.source = source;
     }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }
 

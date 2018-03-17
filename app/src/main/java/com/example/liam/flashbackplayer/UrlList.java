@@ -15,6 +15,10 @@ class UrlList {
             urlMap.put(song.getId(), song.getUrl());
     }
 
+    void addSong(Song song) {
+        urlMap.put(song.getId(), song.getUrl());
+    }
+
     Map<String, String> getUrlMap() {
         return urlMap;
     }

@@ -138,6 +138,7 @@ public class FirebaseService {
     }
 
     public void updateCloudSongList(Map<String, String> songList) {
+        Log.i("Firebase", "Attampting to update cloud song list");
         Map<String, Object> objList = new HashMap<>();
         objList.putAll(songList);
         DatabaseReference cloudListRef = database.getReference("songs");

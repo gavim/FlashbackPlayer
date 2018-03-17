@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +31,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Calendar;
 
 import java.util.ArrayList;
@@ -83,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
     private UrlList urlList;
     private FirebaseService fbs;
 
+    private MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+
     /**
      * Override the oncreate method to handle the basic button function such as
      * play/pause button, skip forward/back button
@@ -93,18 +103,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        onComplete = new BroadcastReceiver() {
-            public void onReceive(Context ctxt, Intent intent) {
-                File downloadedFile = loader.getLastDownloadedFile();
-                loader.populateAlbumWithSong(downloadedFile);
-                loader.generateMList();
-                albumMap = loader.getAlbumMap();
-                masterList = loader.getmList();
-                uiManager.populateUI(displayMode);
-                //do something with the last downloaded file here...
-            }
-        };
-        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
+//        onComplete = new BroadcastReceiver() {
+//            public void onReceive(Context ctxt, Intent intent) {
+//                File downloadedFile = loader.getLastDownloadedFile();
+//                loader.populateAlbumWithSong(downloadedFile);
+//                loader.generateMList();
+//                albumMap = loader.getAlbumMap();
+//                masterList = loader.getmList();
+//                urlList = new UrlList(masterList);
+//                uiManager.populateUI(displayMode);
+//                //do something with the last downloaded file here...
+//            }
+//        };
+//        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         getPermsExplicit();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -443,10 +455,135 @@ public class MainActivity extends AppCompatActivity {
             case DOWNLOAD_MUSIC:
                 if (resultCode == RESULT_OK && data != null) {
                     String url = data.getStringExtra(DownloadActivity.EXTRA_URL);
-                    loader.downloadFromUri(Uri.parse(url));
+                    new DownloadSongAsync().execute(url);
                 }
                 break;
         }
     }
 
+
+    class DownloadSongAsync extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... strings) {
+            String fileUrl = strings[0];
+
+            InputStream input = null;
+            FileOutputStream output = null;
+            HttpURLConnection urlConnection = null;
+            File dest = loader.getDefaultMusicDirectory();
+            try {
+                URL url = new URL(fileUrl);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.connect();
+
+                // expect HTTP 200 OK, so we don't mistakenly save error report instead of the file
+                if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    return "Server returned HTTP " + urlConnection.getResponseCode()
+                            + " " + urlConnection.getResponseMessage();
+                }
+
+                String fileName = "";
+                String disposition = urlConnection.getHeaderField("Content-Disposition");
+
+                if (disposition != null) {
+                    // extracts file name from header field
+                    int index = disposition.indexOf("filename=");
+                    if (index > 0) {
+                        fileName = disposition.substring(index + 10, disposition.length() - 1);
+                        if (fileName.contains("\"")) {
+                            fileName = fileName.split("\"")[0];
+                        }
+                    }
+                } else {
+                    // extracts file name from URL
+                    fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1, fileUrl.length());
+                }
+
+                String path = dest.toString() + File.separator + fileName;
+
+                // download the file
+                input = urlConnection.getInputStream();
+
+                // opens an output stream to save into file
+                output = new FileOutputStream(path);
+
+                byte data[] = new byte[4096];
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    // allow canceling with back button
+                    if (isCancelled()) {
+                        input.close();
+                        return null;
+                    }
+                    output.write(data, 0, count);
+                }
+
+                Log.i("DownloadFinished", fileName);
+                Log.i("DownloadFinishedPath", path);
+
+                FileDescriptor fd = (new FileInputStream(path)).getFD();
+                mmr.setDataSource(fd);
+                String songName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+                String length = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+                String albumName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+
+                int trueLength = 0;
+
+                if (albumName == null)
+                    albumName = "Unknown Album";
+                if (songName == null)
+                    songName = "Unknown Song";
+                if (artist == null)
+                    artist = "Unknown Artist";
+                if (length != null)
+                    trueLength = Integer.parseInt(length);
+
+                Log.i("DownloadFinishedArtist", "AAA " + artist);
+
+                //update album in map if it already exists, otherwise create the album
+                if (albumMap.containsKey(albumName)) {
+                    Album toEdit = albumMap.get(albumName);
+                    if (!toEdit.contains(songName)) {
+                        Song newSong = new LocalSong(songName, path, artist, trueLength, albumName);
+                        newSong.setUrl(fileUrl);
+                        toEdit.addSong(newSong);
+                        masterList.add(newSong);
+
+                        albumMap.put(albumName, toEdit);
+                    }
+                } else {
+                    Album toAdd = new Album(albumName);
+                    Song newSong = new LocalSong(songName, path, artist, trueLength, albumName);
+                    newSong.setUrl(fileUrl);
+                    toAdd.addSong(newSong);
+                    masterList.add(newSong);
+
+                    albumMap.put(albumName, toAdd);
+                }
+
+                loader.generateMList();
+                albumMap = loader.getAlbumMap();
+                masterList = loader.getmList();
+                urlList = new UrlList(masterList);
+                uiManager.populateUI(displayMode);
+            } catch (Exception e) {
+                return e.toString();
+            } finally {
+                try {
+                    if (output != null)
+                        output.close();
+                    if (input != null)
+                        input.close();
+                } catch (IOException ignored) {
+                }
+
+                if (urlConnection != null)
+                    urlConnection.disconnect();
+            }
+
+            return null;
+        }
+    }
 }

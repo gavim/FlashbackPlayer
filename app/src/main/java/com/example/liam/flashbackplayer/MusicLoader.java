@@ -155,8 +155,7 @@ public class MusicLoader {
             if (albumMap.containsKey(albumName)) {
                 Album toEdit = albumMap.get(albumName);
                 if (!toEdit.contains(songName)) {
-                    Song newSong = new LocalSong(songName, song.getPath(), artist,
-                            trueLength, albumName);
+                    Song newSong = new LocalSong(songName, song.getPath(), artist, trueLength, albumName);
                     toEdit.addSong(newSong);
                     albumMap.put(albumName, toEdit);
                 }
@@ -236,23 +235,23 @@ public class MusicLoader {
         ArrayList<String> toRemove2 = new ArrayList<>();
 
         for (Album toAdd : albumMap.values()) {
-            for(Song song : toAdd.getSongList()) {
-                if(!new File(song.getSource()).exists()) {
+            for (Song song : toAdd.getSongList()) {
+                if (!new File(song.getSource()).exists()) {
                     toRemove.add(song);
                 }
             }
-            for(Song remove : toRemove) {
+            for (Song remove : toRemove) {
                 toAdd.removeSong(remove);
             }
 
             toRemove = toAdd.getSongList();
-            if(toRemove.size() == 0) {
+            if (toRemove.size() == 0) {
                 toRemove2.add(toAdd.getName());
             } else {
                 mList.addAll(toAdd.getSongList());
             }
         }
-        for(String remove : toRemove2) {
+        for (String remove : toRemove2) {
             albumMap.remove(remove);
         }
     }
