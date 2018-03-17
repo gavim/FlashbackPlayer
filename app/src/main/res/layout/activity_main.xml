@@ -20,17 +20,17 @@
         android:id="@+id/btnSignIn"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="Sign In"
+        android:text="SignIn"
         android:textColor="@color/colorAccent"
-        app:layout_constraintStart_toEndOf="@id/btnPlayer"
         app:layout_constraintEnd_toStartOf="@+id/btnDownload"
+        app:layout_constraintStart_toEndOf="@id/btnPlayer"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnDownload"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="Download"
+        android:text="DL"
         android:textColor="@color/colorAccent"
         app:layout_constraintEnd_toStartOf="@+id/btnFlashback"
         app:layout_constraintStart_toEndOf="@+id/btnSignIn"

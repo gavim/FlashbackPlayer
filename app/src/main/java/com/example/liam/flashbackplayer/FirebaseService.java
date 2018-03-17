@@ -3,6 +3,7 @@ package com.example.liam.flashbackplayer;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +32,8 @@ public class FirebaseService {
     private MediaMetadataRetriever mmr = new MediaMetadataRetriever();
     private FlashbackManager flashbackManager;
     private UrlList urlList;
+
+    private Boolean readyForVibe = false;
 
     public FirebaseService(UrlList urlList, MusicLoader loader, FlashbackManager flashbackManager) {
         database = FirebaseDatabase.getInstance();
@@ -62,6 +65,8 @@ public class FirebaseService {
 
                     new DownloadSongAsync().execute(downloading);
                 }
+
+                readyForVibe = true;
             }
 
             @Override
@@ -76,58 +81,68 @@ public class FirebaseService {
         cloudHistListRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (Song curSong : songList) {
-                    DataSnapshot curSongHist = dataSnapshot.child(curSong.getId());
-                    if (curSongHist == null) {
-                        curSong.setRanking(0);
-                        curSong.setPlayedBy("");
-                        continue;
-                    }
+                try {
+                    while (!readyForVibe)
+                        Thread.sleep(500);
 
-                    int maxRank = 0;
-                    String maxUser = "";
-                    for (DataSnapshot oneHist : curSongHist.getChildren()) {
-                        int curRank = 0;
-                        double lat = oneHist.child("lat").getValue(Double.class);
-                        double lon = oneHist.child("lon").getValue(Double.class);
-                        int yearAndDay = oneHist.child("day").getValue(Integer.class);
-                        String userId = oneHist.child("user").getValue(String.class);
+                    readyForVibe = false;
 
-                        // (a) whether it was played near the user's present location
-                        if ((Math.pow(curLat - lat, 2) + Math.pow(curLon - lon, 2)) < 0.0001)
-                            curRank += 1000;
-
-                        // (b) whether it was played in the last week
-                        if (curYearAndDay % 1000 < 8) {
-                            if (curYearAndDay - yearAndDay < 648) curRank += 100;
-                        } else {
-                            if (curYearAndDay - yearAndDay < 8) curRank += 100;
+                    for (Song curSong : songList) {
+                        DataSnapshot curSongHist = dataSnapshot.child(curSong.getId());
+                        if (curSongHist == null) {
+                            curSong.setRanking(0);
+                            curSong.setPlayedBy("");
+                            continue;
                         }
 
-                        // (c) whether it was played by a friend
-                        if (friends.containsKey(userId)) curRank += 10;
+                        int maxRank = 0;
+                        String maxUser = "";
+                        for (DataSnapshot oneHist : curSongHist.getChildren()) {
+                            int curRank = 0;
+                            double lat = oneHist.child("lat").getValue(Double.class);
+                            double lon = oneHist.child("lon").getValue(Double.class);
+                            int yearAndDay = oneHist.child("day").getValue(Integer.class);
+                            String userId = oneHist.child("user").getValue(String.class);
 
-                        if (curRank == 1000) curRank = 105;
+                            // (a) whether it was played near the user's present location
+                            if ((Math.pow(curLat - lat, 2) + Math.pow(curLon - lon, 2)) < 0.0001)
+                                curRank += 1000;
 
-                        if (curRank > maxRank) {
-                            maxRank = curRank;
-                            maxUser = userId;
+                            // (b) whether it was played in the last week
+                            if (curYearAndDay % 1000 < 8) {
+                                if (curYearAndDay - yearAndDay < 648) curRank += 100;
+                            } else {
+                                if (curYearAndDay - yearAndDay < 8) curRank += 100;
+                            }
+
+                            // (c) whether it was played by a friend
+                            if (friends.containsKey(userId)) curRank += 10;
+
+                            if (curRank == 1000) curRank = 105;
+
+                            if (curRank > maxRank) {
+                                maxRank = curRank;
+                                maxUser = userId;
+                            }
                         }
+                        curSong.setRanking(maxRank);
+                        curSong.setPlayedBy(maxUser);
                     }
-                    curSong.setRanking(maxRank);
-                    curSong.setPlayedBy(maxUser);
+
+                    for (Song song : songList)
+                        Log.d("RANKINGGGGGGGGGG", String.valueOf(song.getRanking()));
+
+                    flashbackManager.rankSongs(songList);
+                    PriorityQueue<Song> pq = flashbackManager.getRankList();
+
+                    //add songs in pq into the flashbackList
+                    while (!pq.isEmpty())
+                        MainActivity.flashbackList.add(pq.poll());
+
+                    uiManager.populateUI(MainActivity.MODE_VIBE);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-
-                for (Song song : songList)
-                    Log.d("RANKINGGGGGGGGGG", String.valueOf(song.getRanking()));
-
-                flashbackManager.rankSongs(songList);
-                PriorityQueue<Song> pq = flashbackManager.getRankList();
-
-                //add songs in pq into the flashbackList
-                while (!pq.isEmpty())
-                    MainActivity.flashbackList.add(pq.poll());
-                uiManager.populateUI(MainActivity.MODE_VIBE);
             }
 
             @Override

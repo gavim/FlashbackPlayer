@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     albumMap = loader.getAlbumMap();
                     masterList = loader.getmList();
                     uiManager.populateUI(displayMode);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Log.e("UNZIPPING DL", e.getMessage());
                 }
             }
@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
             case DOWNLOAD_MUSIC:
                 if (resultCode == RESULT_OK && data != null) {
                     String url = data.getStringExtra(DownloadActivity.EXTRA_URL);
-                    if(loader.isZip(url)) {
+                    if (loader.isZip(url)) {
                         loader.downloadFromUri(Uri.parse(url));
                     } else {
                         new DownloadSongAsync().execute(url);
@@ -588,7 +588,8 @@ public class MainActivity extends AppCompatActivity {
             return songName;
         }
 
-        protected void onPostExecute (String result) {
+        @Override
+        protected void onPostExecute(String result) {
             Toast.makeText(getBaseContext(), "Finished Downloading " + result, Toast.LENGTH_LONG).show();
             urlList = new UrlList(masterList);
             uiManager.populateUI(displayMode);
