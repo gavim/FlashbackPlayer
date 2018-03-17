@@ -8,12 +8,18 @@ import android.os.Environment;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static android.content.Context.DOWNLOAD_SERVICE;
 
@@ -47,6 +53,11 @@ public class MusicLoader {
     public void init() {
         File musicDir = getDefaultMusicDirectory();
         File downloadDir = getDefaultDownloadDirectory();
+        try {
+            unZip(musicDir);
+        } catch (Exception e) {
+            Log.e("UNZIP", e.getMessage());
+        }
         populateAlbumMap(musicDir);
         populateAlbumMap(downloadDir);
     }
@@ -90,12 +101,60 @@ public class MusicLoader {
         return null;
     }
 
+    public File unZip(File root) throws IOException{
+        if (!root.isDirectory()) {
+            //ensure a file is a zip file
+            String extension = MimeTypeMap.getFileExtensionFromUrl(root.getCanonicalPath());
+            File unZipDir = null;
+            if (extension.equals("zip")) {
+                String unZipDirName = root.getCanonicalPath();
+                unZipDirName = unZipDirName.substring(0, unZipDirName.lastIndexOf(extension));
+                unZipDir = new File(unZipDirName);
+                ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(root)));
+                try {
+                    ZipEntry ze;
+                    int count;
+                    byte[] buffer = new byte[8192];
+                    while ((ze = zis.getNextEntry()) != null) {
+                        File file = new File(unZipDir, ze.getName());
+                        File dir = ze.isDirectory() ? file : file.getParentFile();
+                        if (!dir.isDirectory() && !dir.mkdirs()) {
+                            throw new FileNotFoundException("Failed to ensure directory: " + dir.getAbsolutePath());
+                        }
+                        if (ze.isDirectory())
+                            continue;
+                        FileOutputStream fout = new FileOutputStream(file);
+                        try {
+                            while ((count = zis.read(buffer)) != -1)
+                                fout.write(buffer, 0, count);
+                        } finally {
+                            fout.close();
+                        }
+                    }
+                    root.delete();
+                } catch (Exception e) {
+                    Log.e("UNZIP", e.getMessage());
+                } finally {
+                    zis.close();
+                }
+            }
+            return unZipDir;
+        }
+        File[] dirContents = root.listFiles();
+        if (dirContents != null) {
+            for (File newRoot : dirContents) {
+                unZip(newRoot);
+            }
+        }
+        return null;
+    }
+
     /**
      * This method is to populate the album map with the given file
      *
      * @param root file that want to populate
      */
-    private void populateAlbumMap(File root) {
+    public void populateAlbumMap(File root) {
         //if a file in the Music directory is not another directory, it must be a song
         if (!root.isDirectory()) {
             //ensure a file is an audio file
@@ -266,5 +325,10 @@ public class MusicLoader {
 
     public File getLastDownloadedFile() {
         return this.lastDownloadedFile;
+    }
+
+    public boolean isZip(String url) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+        return (extension.equals("zip"));
     }
 }

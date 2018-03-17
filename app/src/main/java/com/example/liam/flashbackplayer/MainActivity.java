@@ -1,14 +1,18 @@
 package com.example.liam.flashbackplayer;
 
 import android.Manifest;
+import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -101,7 +105,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        onComplete = new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
+                File downloadedFile = loader.getLastDownloadedFile();
+                try {
+                    File unzipDir = loader.unZip(downloadedFile);
+                    loader.populateAlbumMap(unzipDir);
+                    loader.generateMList();
+                    albumMap = loader.getAlbumMap();
+                    masterList = loader.getmList();
+                    uiManager.populateUI(displayMode);
+                } catch(Exception e) {
+                    Log.e("UNZIPPING DL", e.getMessage());
+                }
+            }
+        };
+        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         getPermsExplicit();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
@@ -439,7 +458,11 @@ public class MainActivity extends AppCompatActivity {
             case DOWNLOAD_MUSIC:
                 if (resultCode == RESULT_OK && data != null) {
                     String url = data.getStringExtra(DownloadActivity.EXTRA_URL);
-                    new DownloadSongAsync().execute(url);
+                    if(loader.isZip(url)) {
+                        loader.downloadFromUri(Uri.parse(url));
+                    } else {
+                        new DownloadSongAsync().execute(url);
+                    }
                 }
                 break;
         }
@@ -451,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             String fileUrl = strings[0];
-            String songName = "ERROR_NO_SONG";
+            String songName;
             InputStream input = null;
             FileOutputStream output = null;
             HttpURLConnection urlConnection = null;
