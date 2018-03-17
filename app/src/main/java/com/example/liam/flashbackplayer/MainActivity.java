@@ -1,18 +1,14 @@
 package com.example.liam.flashbackplayer;
 
 import android.Manifest;
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -29,6 +25,7 @@ import android.view.View;
 import android.media.MediaPlayer;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -43,6 +40,7 @@ import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.PriorityQueue;
+
 
 /**
  * Main Activity that build the all the media player functionality such as
@@ -103,20 +101,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-//        onComplete = new BroadcastReceiver() {
-//            public void onReceive(Context ctxt, Intent intent) {
-//                File downloadedFile = loader.getLastDownloadedFile();
-//                loader.populateAlbumWithSong(downloadedFile);
-//                loader.generateMList();
-//                albumMap = loader.getAlbumMap();
-//                masterList = loader.getmList();
-//                urlList = new UrlList(masterList);
-//                uiManager.populateUI(displayMode);
-//                //do something with the last downloaded file here...
-//            }
-//        };
-//        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
 
         getPermsExplicit();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
@@ -467,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             String fileUrl = strings[0];
-
+            String songName = "ERROR_NO_SONG";
             InputStream input = null;
             FileOutputStream output = null;
             HttpURLConnection urlConnection = null;
@@ -524,7 +508,7 @@ public class MainActivity extends AppCompatActivity {
 
                 FileDescriptor fd = (new FileInputStream(path)).getFD();
                 mmr.setDataSource(fd);
-                String songName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+                songName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
                 String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
                 String length = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                 String albumName = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
@@ -563,14 +547,6 @@ public class MainActivity extends AppCompatActivity {
                     albumMap.put(albumName, toAdd);
                 }
 
-                //--------------------
-                loader.generateMList();
-                albumMap = loader.getAlbumMap();
-                masterList = loader.getmList();
-                urlList = new UrlList(masterList);
-                uiManager.populateUI(displayMode);
-                //----------------
-
             } catch (Exception e) {
                 return e.toString();
             } finally {
@@ -586,7 +562,13 @@ public class MainActivity extends AppCompatActivity {
                     urlConnection.disconnect();
             }
 
-            return null;
+            return songName;
+        }
+
+        protected void onPostExecute (String result) {
+            Toast.makeText(getBaseContext(), "Finished Downloading " + result, Toast.LENGTH_LONG).show();
+            urlList = new UrlList(masterList);
+            uiManager.populateUI(displayMode);
         }
     }
 }

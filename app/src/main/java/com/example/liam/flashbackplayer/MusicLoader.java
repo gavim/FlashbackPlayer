@@ -224,9 +224,9 @@ public class MusicLoader {
     }
 
     /**
-     * Return the hash map of the album map that you build
+     * Return the list of all songs generated from files
      *
-     * @return album hash map
+     * @return void, but mList member variable will be populated
      */
 
     public void generateMList() {
