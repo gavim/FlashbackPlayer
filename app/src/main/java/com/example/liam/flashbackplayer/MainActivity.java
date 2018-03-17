@@ -563,11 +563,14 @@ public class MainActivity extends AppCompatActivity {
                     albumMap.put(albumName, toAdd);
                 }
 
+                //--------------------
                 loader.generateMList();
                 albumMap = loader.getAlbumMap();
                 masterList = loader.getmList();
                 urlList = new UrlList(masterList);
                 uiManager.populateUI(displayMode);
+                //----------------
+
             } catch (Exception e) {
                 return e.toString();
             } finally {
