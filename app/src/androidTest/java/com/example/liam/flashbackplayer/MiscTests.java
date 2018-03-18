@@ -129,17 +129,4 @@ public class MiscTests {
         assertEquals(true, sortedSongs.equals(unsortedSongs));
         assertEquals(false, sortedSongs == unsortedSongs);
     }
-
-    @Test
-    public void vibeModeTest() {
-        onView(withId(R.id.btnFlashback)).perform(click());
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        assertEquals(true, mainAct.getActivity().masterList != null);
-        assertEquals(true, mainAct.getActivity().masterList.size() > 0);
-        assertEquals(true, mainAct.getActivity().musicController.isPlaying());
-    }
 }
