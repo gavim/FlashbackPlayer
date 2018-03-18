@@ -325,16 +325,7 @@ public class MainActivity extends AppCompatActivity {
         Button playerMode = (Button) findViewById(R.id.btnPlayer);
         Button flashbackMode = (Button) findViewById(R.id.btnFlashback);
         if (displayMode == MODE_VIBE) {
-            playerMode.getBackground().clearColorFilter();
-            flashbackMode.getBackground().setColorFilter(Color.DKGRAY, PorterDuff.Mode.MULTIPLY);
-            GPSTracker gps = new GPSTracker(this);
-            flashbackManager.updateLocAndTime(gps, Calendar.getInstance());
-            flashbackManager.rankSongs(masterList);
-            PriorityQueue<Song> pq = flashbackManager.getRankList();
-            if (!pq.isEmpty()) {
-                flashbackList.add(pq.poll());
-            }
-        } else {
+            displayMode = MODE_SONG;
             flashbackMode.getBackground().clearColorFilter();
             playerMode.getBackground().setColorFilter(Color.DKGRAY, PorterDuff.Mode.MULTIPLY);
         }
