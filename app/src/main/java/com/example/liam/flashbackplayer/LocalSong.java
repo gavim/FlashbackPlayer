@@ -39,7 +39,14 @@ public class LocalSong implements Song {
         this.artist = artist;
         this.length = length;
         this.albumName = albumName;
-        this.id = name + "=" + albumName;
+        String normName = name;
+        normName = normName.replaceAll("\\.", "\0");
+        normName = normName.replaceAll("\\[", "\0");
+        normName = normName.replaceAll("]", "\0");
+        normName = normName.replaceAll("#", "\0");
+        normName = normName.replaceAll("\\$", "\0");
+
+        this.id = normName + "=" + albumName;
 
         this.preference = NEUTRAL;
         this.ranking = 0;
