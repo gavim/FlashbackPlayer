@@ -10,6 +10,9 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.PriorityQueue;
 
+/**
+ * New method that is a app mediator to work with firebase and UI stuff
+ */
 public class AppMediator {
     private FlashbackManager flashbackManager;
     private MusicController musicController;
@@ -20,6 +23,14 @@ public class AppMediator {
 
     private String userId;
 
+    /**
+     * construct to inilize this method whne call it
+     * @param fbm flash manage
+     * @param mc music controller
+     * @param uim UI manage
+     * @param fbs Firebase service
+     * @param act activity
+     */
     public AppMediator(FlashbackManager fbm, MusicController mc, UIManager uim, FirebaseService fbs, Activity act) {
         this.flashbackManager = fbm;
         this.musicController = mc;
@@ -32,10 +43,20 @@ public class AppMediator {
         this.uiManager.setAppMediator(this);
     }
 
+    /**
+     * setter to set id
+     * @param id that want to set
+     */
     public void setUserId(String id) {
         userId = id;
     }
 
+    /**
+     * set the favorite onclick song
+     * @param song song  want to set
+     * @param fave fave
+     * @param pos position
+     */
     public void setFaveOnclick(Song song, ImageView fave, int pos) {
         song.changePreference();
         fave.setImageResource(MainActivity.FAVE_ICONS[song.getPreference()]);
@@ -44,6 +65,11 @@ public class AppMediator {
         }
     }
 
+    /**
+     * Set Item onclick by given index and mode
+     * @param displayMode mode want to display
+     * @param index index that want to set
+     */
     public void setItemOnclick(int displayMode, int index) {
         switch (displayMode) {
             case (MainActivity.MODE_SONG):
@@ -57,6 +83,12 @@ public class AppMediator {
         }
     }
 
+    /**
+     * Boolean to check if the start is need to be do
+     * @param displayMode mode that want to play
+     * @param name of the song
+     * @return true if start
+     */
     public boolean shouldAutoStart(int displayMode, String name) {
         if (displayMode == MainActivity.MODE_ALBUM) {
             return !(MainActivity.perAlbumList != null
