@@ -134,20 +134,6 @@ public class AppMediator {
         }
         if (playMode == MainActivity.MODE_VIBE) {
             Log.i("SONG DONE", MainActivity.flashbackList.get(musicController.getCurrSong()).getName());
-
-            //update curr loc and time to implement the ranking algorihtm
-            GPSTracker gps = new GPSTracker(flashbackManager.getContext());
-            flashbackManager.updateLocAndTime(gps, Calendar.getInstance());
-            flashbackManager.rankSongs(MainActivity.masterList);
-            PriorityQueue<Song> pq = flashbackManager.getRankList();
-
-            //add songs in pq into the flashbackList
-            while (!pq.isEmpty()) {
-                if (!MainActivity.flashbackList.contains(pq.peek())) {
-                    MainActivity.flashbackList.add(pq.poll());
-                    break;
-                }
-            }
             musicController.skipSong(1);
         }
     }
@@ -156,10 +142,10 @@ public class AppMediator {
         //update curr loc and time, for display and storage
         flashbackManager.updateLocAndTime(gps, cal);
         //Get last-played-by info
-        String playByName = "You";
+        String playByName;
         String playedBy = playing.getPlayedBy();
         if (playedBy.equals("")) {
-            playByName = "NoOne";
+            playByName = "No One";
         } else if (MainActivity.myEmail.equals(playedBy)) {
             playByName = "You";
         } else if (MainActivity.emailAndName.containsKey(playedBy)) {

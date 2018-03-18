@@ -65,6 +65,11 @@ public class UITests {
             Log.e("TEST SIGN IN", e.getMessage());
         }
 
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         ViewInteraction sortBtn = onView(withId(R.id.btn_sortby));
         sortBtn.perform(click());
         onView(withText("Names")).perform(click());
@@ -295,8 +300,7 @@ public class UITests {
         ViewInteraction playedByName = onView(withId(R.id.lastPlayedBy));
         playedByName.check(matches(isDisplayed()));
         TextView nameField = (TextView) mActivityTestRule.getActivity().findViewById(R.id.lastPlayedBy);
-        assertEquals("You", nameField.getText());
-        assertEquals(Typeface.ITALIC, nameField.getTypeface().getStyle());
+        assertEquals("No One", nameField.getText());
     }
 
 }

@@ -45,6 +45,11 @@ public class MediaPlayerTests {
             Log.e("TEST SIGN IN", e.getMessage());
         }
 
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         ViewInteraction sortBtn = onView(withId(R.id.btn_sortby));
         sortBtn.perform(click());
         onView(withText("Names")).perform(click());
