@@ -15,21 +15,13 @@ public class LocalSong implements Song {
     private String source;
     private String artist;
     private String albumName;
-    private String url;
     private int length; //length in milliseconds
 
     private String id;
     private String playedBy;
+    private String url;
 
-    private int[] timePeriod; // period of a day, declared to be an array of size 3
-    //5am-10:59am, 11am-4:49pm, and 5pm-4:49am
-    private int[] day;  // day of a week, declared to be an array of size 7
-    private long lastPlayTime;    //last time to play the song
-    //for example: 41726.0 means Thrusday, 17:26
-    // so the larger nunmber is always the most current played song
-    private ArrayList<SongLocation> locations;
     private int preference;
-
     private int ranking;
 
     /**
@@ -49,9 +41,6 @@ public class LocalSong implements Song {
         this.albumName = albumName;
         this.id = name + "=" + albumName;
 
-        this.timePeriod = new int[3];
-        this.day = new int[7];
-        this.locations = new ArrayList<SongLocation>();
         this.preference = NEUTRAL;
         this.ranking = 0;
         this.playedBy = "";
@@ -66,31 +55,6 @@ public class LocalSong implements Song {
         this.ranking = 0;
         this.playedBy = "";
         this.preference = NEUTRAL;
-    }
-
-    /**
-     * This is the function able to update the Meta date for the songs such as locaton, time ect.
-     *
-     * @param loc          of the song being played
-     * @param dayOfweek    time that played
-     * @param hour         that played
-     * @param lastPlayTime that song being played
-     */
-    @Override
-    public void updateMetadata(SongLocation loc, int dayOfweek, int hour, long lastPlayTime) {
-        // set the day of week to be true
-        day[dayOfweek - 1] = 1;
-
-        //set the period of a day
-        if (5 <= hour && hour < 11)
-            timePeriod[0]++;
-        else if (11 <= hour && hour < 16)
-            timePeriod[1]++;
-        else
-            timePeriod[2]++;
-
-        this.lastPlayTime = lastPlayTime;
-        this.locations.add(loc);
     }
 
     /**
@@ -176,34 +140,6 @@ public class LocalSong implements Song {
     }
 
     /**
-     * get the day of the song that being played
-     *
-     * @return day
-     */
-    public int[] getDay() {
-        return day;
-    }
-
-    /**
-     * Get the time period of the song
-     *
-     * @return song period
-     */
-    public int[] getTimePeriod() {
-        return timePeriod;
-    }
-
-    /**
-     * Return the Arraylist that store the location the song being played
-     *
-     * @return arraylist location
-     */
-    @Override
-    public ArrayList<SongLocation> getLocations() {
-        return locations;
-    }
-
-    /**
      * Get the preference of the song
      *
      * @return song preference
@@ -231,16 +167,6 @@ public class LocalSong implements Song {
             default:
                 break;
         }
-    }
-
-    /**
-     * get the last play time of the song
-     *
-     * @return song's last play time
-     */
-    @Override
-    public long getLastPlayTime() {
-        return lastPlayTime;
     }
 
     @Override

@@ -15,15 +15,10 @@ import java.util.PriorityQueue;
 
 /**
  * This is a FlashbackManager class that will manage teh flashback mode algorithm
-    so that songns will be played in order in flashback mode 
+ * so that songns will be played in order in flashback mode
  */
 public class FlashbackManager {
     private double longitude, latitude;
-    private int date;
-    private int dayOfWeek;
-    private int hour;
-    private int mins;
-    private long lastPlayedTime;
     private boolean shouldUpdate;
     private long mockMillis;
 
@@ -96,16 +91,8 @@ public class FlashbackManager {
         if (!shouldUpdate) {
             calendar.setTime(new Date(mockMillis));
         }
-        //get time info to store
-        dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        date = calendar.get(Calendar.DATE);
-        hour = calendar.get(Calendar.HOUR_OF_DAY);
-        mins = calendar.get(Calendar.MINUTE);
 
         yearAndDay = calendar.get(Calendar.DAY_OF_YEAR) + calendar.get(Calendar.YEAR) * 1000;
-
-        //calculate lastPlayedTime in double format
-        lastPlayedTime = date * 10000 + hour * 100 + mins;
 
         //get current time to display
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
@@ -123,7 +110,7 @@ public class FlashbackManager {
             } else if (left.getRanking() < right.getRanking()) {
                 return 1;
             } else {
-                if (left.getLastPlayTime() > right.getLastPlayTime())
+                if (left.getPreference() > right.getPreference())
                     return -1;
                 else
                     return 1;
@@ -146,18 +133,6 @@ public class FlashbackManager {
 
     public long getMockMillis() {
         return mockMillis;
-    }
-
-    public int getDayOfWeek() {
-        return dayOfWeek;
-    }
-
-    public int getHour() {
-        return hour;
-    }
-
-    public long getLastPlayedTime() {
-        return lastPlayedTime;
     }
 
     public int getYearAndDay() {

@@ -44,10 +44,19 @@ public class FirebaseService {
 
     // Get the songs that exist only on the cloud
     public void makeCloudChangelist(final Map<String, String> localSongList) {
+        FirebaseDatabase fbd = FirebaseDatabase.getInstance();
+        DatabaseReference fbRef = fbd.getReference().child("songs");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        database.getReference("songs").addListenerForSingleValueEvent(new ValueEventListener() {
+        fbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.i("CHECK songs Folder", "");
+
                 Map<String, String> changeList = new HashMap<>();
 
                 for (DataSnapshot song : dataSnapshot.getChildren()) {
@@ -62,6 +71,7 @@ public class FirebaseService {
                     Song downloading = new LocalSong(parts[0], parts[1], songId, pair.getValue());
                     MainActivity.masterList.add(downloading);
                     loader.addSongToAlbum(downloading);
+                    urlList.addSong(downloading);
 
                     new DownloadSongAsync().execute(downloading);
                 }
@@ -83,7 +93,7 @@ public class FirebaseService {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 try {
                     while (!readyForVibe)
-                        Thread.sleep(500);
+                        Thread.sleep(300);
 
                     readyForVibe = false;
 
@@ -237,7 +247,7 @@ public class FirebaseService {
                 Log.i("DownloadFinished", downloading.getName());
                 Log.i("DownloadFinishedPath", path);
 
-                FileDescriptor fd = output.getFD();
+                FileDescriptor fd = (new FileInputStream(path)).getFD();
                 mmr.setDataSource(fd);
                 String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
                 String length = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
@@ -246,7 +256,6 @@ public class FirebaseService {
                 downloading.setArtist(artist == null ? "Unknown Artist" : artist);
                 downloading.setLength(length == null ? 0 : Integer.parseInt(length));
                 downloading.setSource(path);
-
             } catch (Exception e) {
                 return e.toString();
             } finally {

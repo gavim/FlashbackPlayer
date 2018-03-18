@@ -31,6 +31,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -197,9 +200,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void onEnterVibeMode() {
-        fbs.makeCloudChangelist(urlList.getUrlMap());
-
-        fbs.updateCloudSongList(urlList.getUrlMap());
+        fbs.makeCloudChangelist(urlList.getSongMap(masterList));
+//        fbs.updateCloudSongList(urlList.getSongMap(masterList));
     }
 
     /**
@@ -549,11 +551,12 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.i("DownloadFinishedArtist", "AAA " + artist);
 
+                Song newSong = null;
                 //update album in map if it already exists, otherwise create the album
                 if (albumMap.containsKey(albumName)) {
                     Album toEdit = albumMap.get(albumName);
                     if (!toEdit.contains(songName)) {
-                        Song newSong = new LocalSong(songName, path, artist, trueLength, albumName);
+                        newSong = new LocalSong(songName, path, artist, trueLength, albumName);
                         newSong.setUrl(fileUrl);
                         toEdit.addSong(newSong);
                         masterList.add(newSong);
@@ -562,13 +565,17 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     Album toAdd = new Album(albumName);
-                    Song newSong = new LocalSong(songName, path, artist, trueLength, albumName);
+                    newSong = new LocalSong(songName, path, artist, trueLength, albumName);
                     newSong.setUrl(fileUrl);
                     toAdd.addSong(newSong);
                     masterList.add(newSong);
 
                     albumMap.put(albumName, toAdd);
                 }
+
+                FirebaseDatabase fbd = FirebaseDatabase.getInstance();
+                DatabaseReference fbRef = fbd.getReference("songs");
+                fbRef.child(newSong.getId()).setValue(newSong.getUrl());
 
             } catch (Exception e) {
                 return e.toString();

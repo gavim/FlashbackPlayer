@@ -93,7 +93,6 @@ public class AppMediator {
         //only when the song is completed,
         //store location, day of week, hour and last played time        ZHAOKAI XU
         SongLocation songLocation = new SongLocation(flashbackManager.getLongitude(), flashbackManager.getLatitude());
-        played.updateMetadata(songLocation, flashbackManager.getDayOfWeek(), flashbackManager.getHour(), flashbackManager.getLastPlayedTime());
 
         fbs.uploadPlayInfo(played.getId(), songLocation, flashbackManager.getYearAndDay(), userId);
 

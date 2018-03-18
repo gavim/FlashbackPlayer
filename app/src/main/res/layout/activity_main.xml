@@ -13,6 +13,7 @@
         android:layout_marginStart="10dp"
         android:text="Player"
         android:textColor="@color/colorAccent"
+        app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,17 +25,17 @@
         android:textColor="@color/colorAccent"
         app:layout_constraintEnd_toStartOf="@+id/btnDownload"
         app:layout_constraintStart_toEndOf="@id/btnPlayer"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/btnPlayer" />
 
     <Button
         android:id="@+id/btnDownload"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:text="DL"
         android:textColor="@color/colorAccent"
         app:layout_constraintEnd_toStartOf="@+id/btnFlashback"
         app:layout_constraintStart_toEndOf="@+id/btnSignIn"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/btnSignIn" />
 
     <Button
         android:id="@+id/btnFlashback"
@@ -43,8 +44,8 @@
         android:layout_marginEnd="10dp"
         android:text="FlashBack"
         android:textColor="@color/colorAccent"
-        app:layout_constraintBaseline_toBaselineOf="@+id/btnPlayer"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnDownload" />
 
     <ListView
         android:id="@+id/songDisplay"
@@ -159,7 +160,7 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/player_seekbar"
-        tools:layout_width="0dp"/>
+        tools:layout_width="0dp" />
 
     <TextView
         android:id="@+id/AlbumName"
@@ -169,7 +170,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/SongName"
-        tools:layout_width="0dp"/>
+        tools:layout_width="0dp" />
 
     <TextView
         android:id="@+id/currentLocation"
@@ -183,8 +184,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/AlbumName"
         app:layout_constraintVertical_bias="1.0"
-        tools:ignore="MissingConstraints"
-        />
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/currentTime"
@@ -200,7 +200,7 @@
         app:layout_constraintStart_toEndOf="@+id/currentLocation"
         app:layout_constraintTop_toTopOf="@+id/AlbumName"
         app:layout_constraintVertical_bias="1.0"
-        tools:ignore="MissingConstraints"/>
+        tools:ignore="MissingConstraints" />
 
     <TextView
         android:id="@+id/lastPlayedBy"
@@ -214,6 +214,6 @@
         app:layout_constraintStart_toEndOf="@+id/currentTime"
         app:layout_constraintTop_toTopOf="@+id/AlbumName"
         app:layout_constraintVertical_bias="1.0"
-        tools:ignore="MissingConstraints"/>
+        tools:ignore="MissingConstraints" />
 
 </android.support.constraint.ConstraintLayout>

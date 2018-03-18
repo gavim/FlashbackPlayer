@@ -30,6 +30,13 @@ public class MusicController {
     }
 
     public void playSong(final Song toPlay) {
+        while (toPlay.getSource() == null)
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {

@@ -15,8 +15,6 @@ public interface Song extends Comparable {
     int NEUTRAL = 1;
     int FAVORITE = 2;
 
-    void updateMetadata(SongLocation loc, int dayOfweek, int hour, long lastPlayTime);
-
     void setPreference(int pref);
 
     void increaseRanking();
@@ -33,19 +31,11 @@ public interface Song extends Comparable {
 
     int getLength();
 
-    int[] getTimePeriod();
-
-    int[] getDay();
-
     String getAlbumName();
-
-    ArrayList<SongLocation> getLocations();
 
     int getPreference();
 
     void changePreference();
-
-    long getLastPlayTime();
 
     void play(MediaPlayer mediaPlayer);
 
