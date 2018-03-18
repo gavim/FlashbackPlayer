@@ -126,7 +126,8 @@ public class FirebaseService {
                             }
 
                             // (c) whether it was played by a friend
-                            if (friends.containsKey(userId)) curRank += 10;
+                            if (friends != null)
+                                if (friends.containsKey(userId)) curRank += 10;
 
                             if (curRank == 1000) curRank = 105;
 

@@ -149,20 +149,21 @@ public class GoogleLoginActivity extends AppCompatActivity {
                         .execute();
                 List<Person> connections = response.getConnections();
 
-                for (Person person : connections) {
-                    if (!person.isEmpty()) {
-                        List<EmailAddress> emailAddresses = person.getEmailAddresses();
-                        List<Name> names = person.getNames();
+                if (connections != null)
+                    for (Person person : connections) {
+                        if (!person.isEmpty()) {
+                            List<EmailAddress> emailAddresses = person.getEmailAddresses();
+                            List<Name> names = person.getNames();
 
-                        if (emailAddresses != null)
-                            emailList.put(emailAddresses.get(0).getValue(), names.get(0).getDisplayName());
+                            if (emailAddresses != null)
+                                emailList.put(emailAddresses.get(0).getValue(), names.get(0).getDisplayName());
 
-                        if (emailAddresses != null)
-                            for (EmailAddress emailAddress : emailAddresses)
-                                Log.d("", "email: " + emailAddress.getValue());
-                        Log.d("", "names: " + names.get(0).getDisplayName());
+                            if (emailAddresses != null)
+                                for (EmailAddress emailAddress : emailAddresses)
+                                    Log.d("", "email: " + emailAddress.getValue());
+                            Log.d("", "names: " + names.get(0).getDisplayName());
+                        }
                     }
-                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
