@@ -564,10 +564,8 @@ public class MainActivity extends AppCompatActivity {
                     albumMap.put(albumName, toAdd);
                 }
 
-                FirebaseDatabase fbd = FirebaseDatabase.getInstance();
-                DatabaseReference fbRef = fbd.getReference("songs");
-                fbRef.child(newSong.getId()).setValue(newSong.getUrl());
-
+                if (newSong != null)
+                    fbs.updateSongUrl(newSong);
             } catch (Exception e) {
                 return e.toString();
             } finally {

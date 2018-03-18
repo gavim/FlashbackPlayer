@@ -126,7 +126,8 @@ public class FirebaseService {
                             }
 
                             // (c) whether it was played by a friend
-                            if (friends.containsKey(userId)) curRank += 10;
+                            if (friends != null)
+                                if (friends.containsKey(userId)) curRank += 10;
 
                             if (curRank == 1000) curRank = 105;
 
@@ -168,6 +169,11 @@ public class FirebaseService {
         objList.putAll(songList);
         DatabaseReference cloudListRef = database.getReference("songs");
         cloudListRef.updateChildren(objList);
+    }
+
+    public void updateSongUrl(Song song) {
+        DatabaseReference cloudListRef = database.getReference("songs");
+        cloudListRef.child(song.getId()).setValue(song.getUrl());
     }
 
     public void uploadPlayInfo(String songId, SongLocation loc, int yearAndDay, String userId) {
