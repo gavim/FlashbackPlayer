@@ -170,6 +170,11 @@ public class FirebaseService {
         cloudListRef.updateChildren(objList);
     }
 
+    public void updateSongUrl(Song song) {
+        DatabaseReference cloudListRef = database.getReference("songs");
+        cloudListRef.child(song.getId()).setValue(song.getUrl());
+    }
+
     public void uploadPlayInfo(String songId, SongLocation loc, int yearAndDay, String userId) {
         DatabaseReference songHist = database.getReference("songsInfo/" + songId);
         DatabaseReference newHist = songHist.push();
